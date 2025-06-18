@@ -1,0 +1,12 @@
+[
+  {
+    "text": "How would you rate our service?",
+    "rows": ["Speed", "Support", "Ease of Use"],
+    "cols": ["Poor", "Fair", "Good", "Excellent"]
+  },
+  {
+    "text": "Rate your experience with these features:",
+    "rows": ["Dashboard", "Search", "Notifications"],
+    "cols": ["1", "2", "3", "4", "5"]
+  }
+]
