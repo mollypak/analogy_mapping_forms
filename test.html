@@ -7,6 +7,7 @@
     function send() {
       fetch("https://script.google.com/macros/s/AKfycbwb91P7wdaNo48lmGUojKZNJHCQTm47Tiili87FMZDJyvPEry-NycrOz5ibfZpwdUXo/exec", {
         method: "POST",
+        mode: "no-cors",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ test: "hello" })
       })
