@@ -41,7 +41,13 @@
     function submitSurvey() {
       const responses = { questionText: question.text };
       let allFilled = true;
-
+      
+      const userId = document.getElementById("userId").value.trim();
+      if (userId === "") {
+        alert("Please enter your ID.");
+        return;
+      }
+      responses["userId"] = userId;
       question.rows.forEach(row => {
         const selected = document.querySelector(`input[name="${row}"]:checked`);
         if (selected) {
