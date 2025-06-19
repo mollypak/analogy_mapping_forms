@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head><title>Google Apps Script POST Test</title></head>
+<body>
+  <button onclick="send()">Send Test</button>
+  <script>
+    function send() {
+      fetch("https://script.google.com/macros/s/AKfycbxEXAMPLE1234/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ test: "hello" })
+      })
+      .then(res => res.text())
+      .then(text => console.log("OK:", text))
+      .catch(err => console.error("FAILED:", err));
+    }
+  </script>
+</body>
+</html>
