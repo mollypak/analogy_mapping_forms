@@ -12,13 +12,17 @@
 <body>
 
   <h2 id="questionText">Loading...</h2>
-  <form id="surveyForm"></form>
+  <form id="surveyForm">
+    <div class="row">
+      <label for="userId"><strong>What is your ID?</strong></label><br>
+      <input type="text" id="userId" name="userId" required>
+    </div>
+  </form>
   <button type="button" onclick="submitSurvey()">Submit</button>
 
   <script>
-    let question; // will hold the randomly chosen question
+    let question;
 
-    // Load questions from JSON and display one at random
     fetch("questions.json")
       .then(response => response.json())
       .then(data => {
@@ -41,13 +45,14 @@
     function submitSurvey() {
       const responses = { questionText: question.text };
       let allFilled = true;
-      
+
       const userId = document.getElementById("userId").value.trim();
       if (userId === "") {
         alert("Please enter your ID.");
         return;
       }
       responses["userId"] = userId;
+
       question.rows.forEach(row => {
         const selected = document.querySelector(`input[name="${row}"]:checked`);
         if (selected) {
@@ -62,15 +67,12 @@
         return;
       }
 
-      // Submit to Google Apps Script (no-cors mode — no response will be visible)
-fetch("https://script.google.com/macros/s/AKfycbxAq-3NDU0F5V4B-FXRDRUib2yw1B6RhQ6NYuRBzBbUfDBSKVhJz_AMl8SqpgYhepwF/exec", {
-  method: "POST",
-  mode: "no-cors",
-  body: JSON.stringify(responses)
-});
+      fetch("https://script.google.com/macros/s/AKfycbxAq-3NDU0F5V4B-FXRDRUib2yw1B6RhQ6NYuRBzBbUfDBSKVhJz_AMl8SqpgYhepwF/exec", {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(responses)
+      });
 
-
-      // Show message immediately (we can't wait for a real response in no-cors mode)
       alert("Thanks! Your response has been submitted.");
     }
   </script>
