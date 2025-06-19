@@ -11,7 +11,7 @@
 </head>
 <body>
 
-  <h2 id="questionText">Loading...</h2>
+  <h2 id="questionText">Loading questions...</h2>
 
   <form id="surveyForm">
     <!-- Hardcoded ID question here -->
@@ -24,29 +24,95 @@
   <button type="button" onclick="submitSurvey()">Submit</button>
 
   <script>
-    // Your JavaScript that adds the random question rows below the ID input
+    let questions = [];
+
     fetch("questions.json")
       .then(response => response.json())
       .then(data => {
-        question = data[Math.floor(Math.random() * data.length)];
-        document.getElementById("questionText").textContent = question.text;
+        // Pick two different random questions
+        if (data.length < 2) {
+          alert("Not enough questions in questions.json to select two.");
+          return;
+        }
+
+        // Shuffle and pick first two
+        function shuffle(array) {
+          for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+          }
+          return array;
+        }
+
+        let shuffled = shuffle(data.slice());
+        questions = shuffled.slice(0, 2);
+
+        // Show combined question texts
+        document.getElementById("questionText").textContent = questions.map(q => q.text).join(" / ");
 
         const form = document.getElementById("surveyForm");
 
-        // Now add the dynamic question rows here, below the ID input div
-        question.rows.forEach(row => {
-          const div = document.createElement("div");
-          div.className = "row";
-          div.innerHTML = `<strong>${row}</strong><br>` + question.cols.map(col => `
-            <label>
-              <input type="radio" name="${row}" value="${col}" required> ${col}
-            </label>
-          `).join("");
-          form.appendChild(div);
+        // Append all rows from both questions
+        questions.forEach((question, idx) => {
+          question.rows.forEach(row => {
+            const div = document.createElement("div");
+            div.className = "row";
+            // To avoid input name clashes, add question index prefix to name
+            div.innerHTML = `<strong>${row}</strong><br>` + question.cols.map(col => `
+              <label>
+                <input type="radio" name="q${idx}_${row}" value="${col}" required> ${col}
+              </label>
+            `).join("");
+            form.appendChild(div);
+          });
         });
       });
+
+    function submitSurvey() {
+      const responses = {};
+
+      // Validate ID input
+      const userId = document.getElementById("userId").value.trim();
+      if (userId === "") {
+        alert("Please enter your ID.");
+        return;
+      }
+      responses["userId"] = userId;
+
+      // Collect answers for both questions
+      let allFilled = true;
+      questions.forEach((question, idx) => {
+        question.rows.forEach(row => {
+          const inputName = `q${idx}_${row}`;
+          const selected = document.querySelector(`input[name="${inputName}"]:checked`);
+          if (selected) {
+            responses[inputName] = selected.value;
+          } else {
+            allFilled = false;
+          }
+        });
+      });
+
+      if (!allFilled) {
+        alert("Please complete all questions.");
+        return;
+      }
+
+      // Optionally include question texts
+      responses["questionTexts"] = questions.map(q => q.text);
+
+      fetch(
+        "https://script.google.com/macros/s/AKfycbxAq-3NDU0F5V4B-FXRDRUib2yw1B6RhQ6NYuRBzBbUfDBSKVhJz_AMl8SqpgYhepwF/exec",
+        {
+          method: "POST",
+          mode: "no-cors",
+          body: JSON.stringify(responses),
+        }
+      );
+
+      alert("Thanks! Your response has been submitted.");
+    }
   </script>
 
 </body>
-
 </html>
