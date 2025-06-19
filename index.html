@@ -14,6 +14,7 @@
   <h2 id="questionText">Loading...</h2>
 
   <form id="surveyForm">
+    <!-- Hardcoded ID question here -->
     <div class="row">
       <label for="userId"><strong>What is your ID?</strong></label><br />
       <input type="text" id="userId" name="userId" required />
@@ -23,79 +24,29 @@
   <button type="button" onclick="submitSurvey()">Submit</button>
 
   <script>
-    let question;
-
-    // Fetch questions.json, pick one question, and add it below the ID input
+    // Your JavaScript that adds the random question rows below the ID input
     fetch("questions.json")
-      .then((response) => response.json())
-      .then((data) => {
+      .then(response => response.json())
+      .then(data => {
         question = data[Math.floor(Math.random() * data.length)];
         document.getElementById("questionText").textContent = question.text;
 
         const form = document.getElementById("surveyForm");
 
-        // Add the random question rows after the ID input
-        question.rows.forEach((row) => {
+        // Now add the dynamic question rows here, below the ID input div
+        question.rows.forEach(row => {
           const div = document.createElement("div");
           div.className = "row";
-          div.innerHTML =
-            `<strong>${row}</strong><br>` +
-            question.cols
-              .map(
-                (col) => `
+          div.innerHTML = `<strong>${row}</strong><br>` + question.cols.map(col => `
             <label>
               <input type="radio" name="${row}" value="${col}" required> ${col}
-            </label>`
-              )
-              .join(" ");
+            </label>
+          `).join("");
           form.appendChild(div);
         });
-      })
-      .catch((error) => {
-        console.error("Error loading questions.json:", error);
-        document.getElementById("questionText").textContent =
-          "Failed to load questions.";
       });
-
-    function submitSurvey() {
-      const responses = { questionText: question.text };
-
-      // Validate ID input
-      const userId = document.getElementById("userId").value.trim();
-      if (userId === "") {
-        alert("Please enter your ID.");
-        return;
-      }
-      responses["userId"] = userId;
-
-      // Validate all question rows
-      let allFilled = true;
-      question.rows.forEach((row) => {
-        const selected = document.querySelector(`input[name="${row}"]:checked`);
-        if (selected) {
-          responses[row] = selected.value;
-        } else {
-          allFilled = false;
-        }
-      });
-
-      if (!allFilled) {
-        alert("Please complete all rows.");
-        return;
-      }
-
-      // Submit responses (no-cors)
-      fetch(
-        "https://script.google.com/macros/s/AKfycbxAq-3NDU0F5V4B-FXRDRUib2yw1B6RhQ6NYuRBzBbUfDBSKVhJz_AMl8SqpgYhepwF/exec",
-        {
-          method: "POST",
-          mode: "no-cors",
-          body: JSON.stringify(responses),
-        }
-      );
-
-      alert("Thanks! Your response has been submitted.");
-    }
   </script>
+
 </body>
+
 </html>
