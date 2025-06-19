@@ -13,17 +13,16 @@
 
   <h2 id="questionText">Loading...</h2>
   <form id="surveyForm"></form>
-  <button onclick="submitSurvey()">Submit</button>
+  <button type="button" onclick="submitSurvey()">Submit</button>
 
   <script>
     let question; // will hold the randomly chosen question
 
+    // Load questions from JSON and display one at random
     fetch("questions.json")
       .then(response => response.json())
       .then(data => {
-        // Pick one random question from JSON
         question = data[Math.floor(Math.random() * data.length)];
-
         document.getElementById("questionText").textContent = question.text;
 
         const form = document.getElementById("surveyForm");
@@ -40,7 +39,7 @@
       });
 
     function submitSurvey() {
-      const responses = {};
+      const responses = { questionText: question.text };
       let allFilled = true;
 
       question.rows.forEach(row => {
@@ -57,15 +56,18 @@
         return;
       }
 
+      // Submit to Google Apps Script (no-cors mode — no response will be visible)
       fetch("https://script.google.com/macros/s/AKfycbwb91P7wdaNo48lmGUojKZNJHCQTm47Tiili87FMZDJyvPEry-NycrOz5ibfZpwdUXo/exec", {
         method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "application/json" },
+        mode: "no-cors", // 💡 This bypasses CORS restrictions
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(responses)
-      })
-      .then(res => res.text())
-      .then(txt => alert("Thanks! Submitted."))
-      .catch(err => alert("Error: " + err));
+      });
+
+      // Show message immediately (we can't wait for a real response in no-cors mode)
+      alert("Thanks! Your response has been submitted.");
     }
   </script>
 </body>
