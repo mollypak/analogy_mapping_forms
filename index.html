@@ -11,7 +11,7 @@
 </head>
 <body>
 
-  <h2 id="questionText">Loading questions...</h2>
+  <h2 id="questionText">Please answer the following:</h2>
 
   <form id="surveyForm">
     <!-- Hardcoded ID question here -->
@@ -24,19 +24,16 @@
   <button type="button" onclick="submitSurvey()">Submit</button>
 
   <script>
-    console.log("Script loaded and running");
     let questions = [];
 
     fetch("questions.json")
       .then(response => response.json())
       .then(data => {
-        // Pick two different random questions
         if (data.length < 2) {
           alert("Not enough questions in questions.json to select two.");
           return;
         }
 
-        // Shuffle and pick first two
         function shuffle(array) {
           for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -48,17 +45,21 @@
         let shuffled = shuffle(data.slice());
         questions = shuffled.slice(0, 2);
 
-        // Show combined question texts
-        document.getElementById("questionText").textContent = questions.map(q => q.text).join(" / ");
+        // Set generic prompt text at the top
+        document.getElementById("questionText").textContent = "Please answer the following:";
 
         const form = document.getElementById("surveyForm");
 
-        // Append all rows from both questions
+        // Append each question's text and rows below the ID input
         questions.forEach((question, idx) => {
+          // Add question text as a heading
+          const questionHeader = document.createElement("h3");
+          questionHeader.textContent = question.text;
+          form.appendChild(questionHeader);
+
           question.rows.forEach(row => {
             const div = document.createElement("div");
             div.className = "row";
-            // To avoid input name clashes, add question index prefix to name
             div.innerHTML = `<strong>${row}</strong><br>` + question.cols.map(col => `
               <label>
                 <input type="radio" name="q${idx}_${row}" value="${col}" required> ${col}
@@ -67,20 +68,22 @@
             form.appendChild(div);
           });
         });
+      })
+      .catch(error => {
+        console.error("Failed to load or parse questions.json:", error);
+        document.getElementById("questionText").textContent = "Failed to load questions.";
       });
 
     function submitSurvey() {
       const responses = {};
 
-      // Validate ID input
       const userId = document.getElementById("userId").value.trim();
-      if (userId === "") {
+      if (!userId) {
         alert("Please enter your ID.");
         return;
       }
       responses["userId"] = userId;
 
-      // Collect answers for both questions
       let allFilled = true;
       questions.forEach((question, idx) => {
         question.rows.forEach(row => {
@@ -99,7 +102,6 @@
         return;
       }
 
-      // Optionally include question texts
       responses["questionTexts"] = questions.map(q => q.text);
 
       fetch(
