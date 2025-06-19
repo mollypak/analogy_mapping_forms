@@ -12,12 +12,7 @@
 <body>
 
   <h2 id="questionText">Loading...</h2>
-  <form id="surveyForm">
-    <div class="row">
-      <label for="userId"><strong>What is your ID?</strong></label><br>
-      <input type="text" id="userId" name="userId" required>
-    </div>
-  </form>
+  <form id="surveyForm"></form>
   <button type="button" onclick="submitSurvey()">Submit</button>
 
   <script>
@@ -30,6 +25,17 @@
         document.getElementById("questionText").textContent = question.text;
 
         const form = document.getElementById("surveyForm");
+
+        // Add "What is your ID?" field at the top
+        const idDiv = document.createElement("div");
+        idDiv.className = "row";
+        idDiv.innerHTML = `
+          <label for="userId"><strong>What is your ID?</strong></label><br>
+          <input type="text" id="userId" name="userId" required>
+        `;
+        form.appendChild(idDiv);
+
+        // Add each question row with radio options
         question.rows.forEach(row => {
           const div = document.createElement("div");
           div.className = "row";
